@@ -32,7 +32,7 @@ void runAlgos(int N){
 	MonHeurVCStrategy heur(g1);
 	LPVCStrategy lp(g1);
 
-	ResultSet resultSet(N,2);
+	ResultSet resultSet(N,60);
 	resultSet.addProba(3.0/(double)N);
 	resultSet.addProba(4.0/(double)N);
 	resultSet.addProba(5.0/(double)N);
@@ -83,8 +83,14 @@ int main() {
 		runAlgos(i);
 	}
 
-	for(int i=100;i<=200;i+=20){
+	for(int i=100;i<=500;i+=20){
 		runAlgos(i);
 	}
+
+	for(int i=500;i<=1000;i+=50){
+		runAlgos(i);
+	}
+
+
 	return 0;
 }
