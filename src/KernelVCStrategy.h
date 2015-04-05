@@ -13,11 +13,10 @@
 class KernelVCStrategy : public virtual VertexCoverStrategy{
 	Graph *g;
 	int k;
-	int addedToCover;
-	int oldAddedToCover;
+	int _k;
 	Graph ker;
 public:
-	KernelVCStrategy(Graph &g) : g(&g), k(g.N), addedToCover(0), oldAddedToCover(0){}
+	KernelVCStrategy(Graph &g) : g(&g), k(g.N), _k(g.N){}
 
 	virtual string getName(){
 		return string("Kernel-VC");
@@ -29,7 +28,6 @@ public:
 
 	virtual VertexCover findOptimalSolution(){
 		VertexCover currentBest;
-		VertexCover best;
 		GreedyVCStrategy strategy(*this->g);
 		strategy.setTimeLimit(this->time_limit);
 		currentBest = strategy.findOptimalSolution();
@@ -40,21 +38,25 @@ public:
 		bool nDone = true;
 
 		while(nDone){
-			unsigned int k = minK + (maxK-minK)/2;
+			int k = minK + (maxK-minK)/2;
 			if(maxK - minK<=1){
 				nDone = false;
 			}else{
+				bool res = false;
+				VertexCover best;
 				if(this->isAccrossTimeLimit()){
 					break;
 				}
 				getGraphKer(*(this->g), k);
-				ARBVCStrategy ipl(ker);
-				ipl.setTimeLimit(this->time_limit);
-				best = ipl.findOptimalSolution();
-				bool res = best.vertices.size() + (g->N-ker.N) <= k;
+				if(_k >= 0 ){
+					ARBVCStrategy ipl(ker);
+					ipl.setTimeLimit(this->time_limit);
+					best = ipl.findOptimalSolution();
+					res = (int)best.vertices.size() + k -_k <= k;
+				}
 				if(res){
 					currentBest = best;
-					for(unsigned int i=0;i<g->N-ker.N; ++i)
+					for( int i=0;i < k-_k; ++i)
 						currentBest.vertices.push_back(0);
 					maxK = k;
 					this->k = k;
@@ -66,21 +68,27 @@ public:
 		return currentBest;
 	}
 
-	virtual void getGraphKer(Graph &g, unsigned int k){
-		oldAddedToCover = addedToCover;
+	virtual void getGraphKer(Graph &g, int k){
 		vector<int> ids;
-		for(unsigned int i=0; i< g.N; ++i){
-			if(g.getDegree(i) <= 1 || g.getDegree(i) >= k+1)
+		_k  = k;
+		for(unsigned int i=0; i < g.N; ++i){
+			if((int)g.getDegree(i) >= k+1){
 				ids.push_back(i);
+				_k-=1;
+			}
+			else if ( g.getDegree(i) == 1 ){
+		    	ids.push_back(g.getSuccessors(i)[0]);
+		    	_k-=1;
+			}if(_k<0){
+				return;
+			}
 		}
-		addedToCover += ids.size();
 		Graph newG = g.removeVertices(ids);
-		//if(addedToCover == oldAddedToCover){
+		if(_k == k){
 			ker = newG;
 			return;
-		//}
-		//this->getGraphKer(newG, k);
-		//return ;
+		}
+		this->getGraphKer(newG, _k);
 	}
 
 	virtual ~KernelVCStrategy(){};

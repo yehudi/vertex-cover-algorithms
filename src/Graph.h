@@ -65,6 +65,12 @@ public:
 				this->_adjancyMatrix[i][j] = 0;
 			}
 		}
+
+		vector<Edge> edges = D.getEdges();
+
+		for(unsigned int i=0; i<edges.size(); ++i){
+			this->bind(edges[i].first, edges[i].second);
+		}
 	}
 
 	int getUniqueIdentifier(Edge e) const{
