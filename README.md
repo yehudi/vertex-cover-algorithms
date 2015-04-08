@@ -7,9 +7,27 @@ Implemented Algotihms are :
 - ARB-VC
 - Kernel-VC
 - Greedy-VC
-- A Heuristic
+- An Heuristic
 
 ##Requirements
 
 project use c++ standards and glpk libraries for IPL and LP
 
+##Install
+
+Go into Release folder :
+´´´
+$ cd Release/
+´´´
+and type the following commands :
+´´´
+$ make clean
+$ make
+´´´
+##Run
+
+to run the application run :
+´´´
+$ ./Vertex-Cover
+´´´
+and then follow the instructions in the terminal.
