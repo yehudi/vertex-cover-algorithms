@@ -70,6 +70,16 @@ public:
 		return currentBest;
 	}
 
+	virtual bool findOptimalSolutionForKRec(int k, Graph &g){
+		vector< vector <int> > adj = g.getAdjancyList();
+		vector<Edge> edges = g.getEdges();
+		map<int, int> m;
+		for(unsigned int i=0; i< edges.size(); ++i){
+			m[g.getUniqueIdentifier(edges[i])] = g.getUniqueIdentifier(edges[i]);
+		}
+		return findOptimalSolutionForKRec(k,adj,m);
+	}
+
 	virtual bool findOptimalSolutionForKRec(int k, vector< vector<int> > &adj, map<int, int> &m){
 		if(m.empty()){
 			return true;

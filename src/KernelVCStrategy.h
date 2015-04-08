@@ -43,20 +43,20 @@ public:
 				nDone = false;
 			}else{
 				bool res = false;
-				VertexCover best;
 				if(this->isAccrossTimeLimit()){
 					break;
 				}
 				getGraphKer(*(this->g), k);
-				if(_k >= 0 ){
+				if(_k>=0 && ker.getDegree() == 0)
+					res = true;
+				else if(_k >= 0 ){
 					ARBVCStrategy ipl(ker);
 					ipl.setTimeLimit(this->time_limit);
-					best = ipl.findOptimalSolution();
-					res = (int)best.vertices.size() + k -_k <= k;
+					res = ipl.findOptimalSolutionForKRec(_k,ker);
 				}
 				if(res){
-					currentBest = best;
-					for( int i=0;i < k-_k; ++i)
+					currentBest = VertexCover();
+					for( int i=0;i < k; ++i)
 						currentBest.vertices.push_back(0);
 					maxK = k;
 					this->k = k;
@@ -70,18 +70,23 @@ public:
 
 	virtual void getGraphKer(Graph &g, int k){
 		vector<int> ids;
+		vector<bool> token;
+		for(unsigned int i=0; i< g.N; ++i)
+			token.push_back(false);
 		_k  = k;
 		for(unsigned int i=0; i < g.N; ++i){
-			if((int)g.getDegree(i) >= k+1){
-				ids.push_back(i);
-				_k-=1;
-			}
-			else if ( g.getDegree(i) == 1 ){
-		    	ids.push_back(g.getSuccessors(i)[0]);
-		    	_k-=1;
-			}if(_k<0){
-				return;
-			}
+				if((int)g.getDegree(i) >= k+1 && !token[i]){
+					ids.push_back(i);
+					token[i] = true;
+					_k-=1;
+				}
+				else if ( g.getDegree(i) == 1 && !token[g.getSuccessors(i)[0]] && !token[i]){
+					token[g.getSuccessors(i)[0]] = true;
+					ids.push_back(g.getSuccessors(i)[0]);
+					_k-=1;
+				}if(_k<0){
+					return;
+				}
 		}
 		Graph newG = g.removeVertices(ids);
 		if(_k == k){
